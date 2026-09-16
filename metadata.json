@@ -1,0 +1,6 @@
+{
+  "name": "ctrlSee",
+  "description": "Samsung One UI Edge Panel clipboard manager with persistent history, pinning, and tap-to-paste.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
