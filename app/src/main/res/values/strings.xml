@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">ctrlSee</string>
+    <string name="accessibility_service_description">ctrlSee Edge Panel service captures clipboard history and enables tap-to-paste into active input fields.</string>
 </resources>

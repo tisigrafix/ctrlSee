@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.data.AppDatabase
 import com.example.data.ClipItemEntity
 import com.example.data.ClipboardRepository
+import com.example.service.CtrlSeeAccessibilityService
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -22,6 +23,10 @@ class ClipboardViewModel(application: Application) : AndroidViewModel(applicatio
     application.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
 
   val clips: StateFlow<List<MockClipboardItem>>
+
+  private val primaryClipChangedListener = ClipboardManager.OnPrimaryClipChangedListener {
+    captureFromSystemClipboard()
+  }
 
   init {
     val db = AppDatabase.getDatabase(application)
@@ -64,6 +69,18 @@ class ClipboardViewModel(application: Application) : AndroidViewModel(applicatio
         repository.insertAll(initialEntities)
       }
     }
+
+    // Register active clipboard listener to capture incoming copies automatically
+    try {
+      clipboardManager.addPrimaryClipChangedListener(primaryClipChangedListener)
+    } catch (_: Exception) {}
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+    try {
+      clipboardManager.removePrimaryClipChangedListener(primaryClipChangedListener)
+    } catch (_: Exception) {}
   }
 
   // System clipboard capture
@@ -181,11 +198,13 @@ class ClipboardViewModel(application: Application) : AndroidViewModel(applicatio
     }
   }
 
-  // Tap to copy to system clipboard
+  // Tap to copy to system clipboard and attempt direct paste if service active
   fun copyToSystemClipboard(content: String) {
     try {
       val clip = ClipData.newPlainText("ctrlSee", content)
       clipboardManager.setPrimaryClip(clip)
+      // Attempt direct paste via Accessibility if user enabled the Edge Panel service
+      CtrlSeeAccessibilityService.pasteIntoCurrentFocus()
     } catch (_: Exception) {}
   }
 }
